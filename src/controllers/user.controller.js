@@ -7,8 +7,8 @@ import { ApiResponse } from "../utils/apiResponse.js";
 const generateAccessAndRefreshToken = async (userId) => {
   try {
     const user = await User.findById(userId);
-    const accessToken = user.generateAccessToken();
-    const refreshToken = user.generateRefreshToken();
+    const accessToken = await user.generateAccessToken();
+    const refreshToken = await user.generateRefreshToken();
 
     user.refreshToken = refreshToken;
     await user.save({ validateBeforeSave: false });
@@ -105,9 +105,14 @@ const loginUser = asyncHandler(async (req, res) => {
   // send cookie
 
   const { email, username, password } = req.body;
-  if (!username || !email) {
+  if (!username && !email) {
     throw new ApiError(400, "username or email is required");
   }
+
+  //  if (!(email || username)) {          
+      //for login from username or email         
+  //   throw new ApiError(400, "username or email is required");
+  // }
 
   const user = await User.findOne({
     $or: [{ username }, { email }],
@@ -119,7 +124,7 @@ const loginUser = asyncHandler(async (req, res) => {
 
   const isPasswordValid = await user.isPasswordCorrect(password);
 
-  if (!user) {
+  if (!isPasswordValid) {
     throw new ApiError(401, "Invalid User Credentials");
   }
 
@@ -154,11 +159,11 @@ const loginUser = asyncHandler(async (req, res) => {
 });
 
 const logoutUser = asyncHandler(async (req, res) => {
-  User.findByIdAndUpdate(
-    req.body._id,
+ await User.findByIdAndUpdate(
+    req.user._id,
     {
       $set: {
-        refreshToken: undefined,
+        refreshToken: "",
       },
     },
     {

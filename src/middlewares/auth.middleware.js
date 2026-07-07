@@ -9,14 +9,21 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
 
-    if (!token) {
-      throw new ApiError(401, "UnAthorized request");
+    // console.log("DEBUG TOKEN:", token, "| TYPE:", typeof token);
+
+    if (
+      !token ||
+      typeof token !== "string" ||
+      token.trim() === "" ||
+      token === "undefined"
+    ) {
+      throw new ApiError(
+        401,
+        "Unauthorized request - Invalid token format received"
+      );
     }
 
-    const decodedToken = await JWT.verify(
-      token,
-      process.env.ACCESS_TOKEN_SECRET
-    );
+    const decodedToken = JWT.verify(token, process.env.ACCESS_TOKEN_SECRET);
 
     const user = await User.findById(decodedToken?._id).select(
       "-password -refreshToken"
@@ -30,8 +37,8 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    throw new ApiError(401, error.message || "invalid Access Token");
+    next(new ApiError(401, error?.message || "Invalid Access Token"));
   }
 });
 
-export {verifyJWT}
+export { verifyJWT };
