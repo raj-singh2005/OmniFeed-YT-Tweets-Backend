@@ -280,7 +280,7 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
       new ApiResponse(200, updateduser, "account details updated successfully")
     );
 });
-
+//delete images after upload on cloud 
 const updateUserAvatar = asyncHandler(async (req, res) => {
   const avatarLocalPath = req.file?.path;
   if (!avatarLocalPath) {
