@@ -1,6 +1,7 @@
 import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
+import { Video } from "../models/video.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.service.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import JWT from "jsonwebtoken";
@@ -406,11 +407,50 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     );
 });
 
+const addToWatchHistory = asyncHandler(async (req, res) => {
+  const { videoId } = req.params || {};
+
+  if (!mongoose.isValidObjectId(videoId)) {
+    throw new ApiError(400, "Invalid Video Id Format ");
+  }
+
+  const video = await Video.findById(videoId);
+
+  if (!video) {
+    throw new ApiError(404, "Video Does Not Exists In Our Database");
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    req.user._id,
+    {
+      $addToSet: {
+        watchHistory: videoId,
+      },
+    },
+    {
+      new: true,
+    }
+  ).select("-password -refreshToken");
+
+  video.views += 1;
+  await video.save({ validateBeforeSave: false });
+
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        updatedUser,
+        "Video added to watchHistory Succesfully"
+      )
+    );
+});
+
 const getWatchHistory = asyncHandler(async (req, res) => {
   const user = await User.aggregate([
     {
       $match: {
-        _id: new mongoose.Types.ObjectId(req.user_id),
+        _id: new mongoose.Types.ObjectId(req.user._id),
       },
     },
     {
@@ -438,22 +478,26 @@ const getWatchHistory = asyncHandler(async (req, res) => {
             },
           },
           {
-            $addFields:{
+            $addFields: {
               owner: {
-                $first : "$owner"
-              }
-            }
-          }
+                $first: "$owner",
+              },
+            },
+          },
         ],
       },
     },
   ]);
 
-  return res.status(200)
-  .json(
-    new ApiResponse(200,user[0].watchHistory,"watchHistory Fetched succesfully ")
-  )
-  
+  return res
+    .status(200)
+    .json(
+      new ApiResponse(
+        200,
+        user[0].watchHistory,
+        "watchHistory Fetched succesfully "
+      )
+    );
 });
 
 export {
@@ -467,5 +511,6 @@ export {
   updateUserAvatar,
   updateUserCoverImage,
   getUserChannelProfile,
-  getWatchHistory
+  getWatchHistory,
+  addToWatchHistory
 };
