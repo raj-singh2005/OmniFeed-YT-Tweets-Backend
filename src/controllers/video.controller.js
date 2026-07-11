@@ -95,8 +95,67 @@ const getAllVideos = asyncHandler(async (req, res) => {
 });
 
 const publishAVideo = asyncHandler(async (req, res) => {
-  const { title, description } = req.body;
-  
+  //destructure title and description
+  //check if title and description exists
+  //get local paths for videoFile and thumnail
+  //check if local path exists
+  //upload videoFile on claudianry
+  //check if video is uploaded or not
+  //upload thumbnail on claudinary
+  //create videoObject with secureUrl
+  //search created video document in mongoDB
+  //check if video document exists for not
+  //return res
+
+  const { title, description } = req.body || {};
+
+  if (!title || !description) {
+    throw new ApiError(400, "title and description is required");
+  }
+
+  const videoFileLocalPath = req.files?.videoFile?.[0]?.path;
+  const thumbnailLocalPath = req.files?.thumbnail?.[0]?.path;
+
+  if (!videoFileLocalPath || !thumbnailLocalPath) {
+    throw new ApiError(400, "videoFile and thumbnail is required");
+  }
+
+  const uploadedVideoFile = await uploadOnCloudinary(videoFileLocalPath);
+
+  if (!uploadedVideoFile) {
+    throw new ApiError(500, "VideoFile Upload failed");
+  }
+
+  const uploadedThumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+
+  if (!uploadedThumbnail) {
+    if (uploadedVideoFile?.public_id) {
+    // You can export a quick delete function or call it directly if imported
+    await cloudinary.uploader.destroy(uploadedVideoFile.public_id, { resource_type: "video" });
+  }
+    throw new ApiError(500, "thumbnail Upload failed");
+  }
+
+  const durationInMinutes = Number(uploadedVideoFile.duration) / 60;
+
+  const newVideo = await Video.create({
+    videoFile: uploadedVideoFile.secure_url,
+    thumbnail: uploadedThumbnail.secure_url,
+    owner: req.user?._id,
+    title: title,
+    description: description,
+    duration: durationInMinutes,
+  });
+
+  const createdVideo = await Video.findById(newVideo?._id) ;
+  if(!createdVideo){
+    throw new ApiError(501,"failed to publish video")
+  }
+
+  return res.status(201)
+  .json(
+    new ApiResponse(201,createdVideo,"video published successfully")
+  )
 });
 
 const getVideoById = asyncHandler(async (req, res) => {
