@@ -130,9 +130,11 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
   if (!uploadedThumbnail) {
     if (uploadedVideoFile?.public_id) {
-    // You can export a quick delete function or call it directly if imported
-    await cloudinary.uploader.destroy(uploadedVideoFile.public_id, { resource_type: "video" });
-  }
+      // You can export a quick delete function or call it directly if imported
+      await cloudinary.uploader.destroy(uploadedVideoFile.public_id, {
+        resource_type: "video",
+      });
+    }
     throw new ApiError(500, "thumbnail Upload failed");
   }
 
@@ -147,20 +149,62 @@ const publishAVideo = asyncHandler(async (req, res) => {
     duration: durationInMinutes,
   });
 
-  const createdVideo = await Video.findById(newVideo?._id) ;
-  if(!createdVideo){
-    throw new ApiError(501,"failed to publish video")
+  const createdVideo = await Video.findById(newVideo?._id);
+  if (!createdVideo) {
+    throw new ApiError(501, "failed to publish video");
   }
 
-  return res.status(201)
-  .json(
-    new ApiResponse(201,createdVideo,"video published successfully")
-  )
+  return res
+    .status(201)
+    .json(new ApiResponse(201, createdVideo, "video published successfully"));
 });
 
 const getVideoById = asyncHandler(async (req, res) => {
   const { videoId } = req.params;
-  //TODO: get video by id
+
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, "invalid videoId");
+  }
+
+  const video = await Video.aggregate([
+    {
+      $match: {
+        _id: new mongoose.Types.ObjectId(videoId),
+      },
+    },
+    {
+      $lookup: {
+        from: "users",
+        localField: "owner",
+        foreignField: "_id",
+        as: "owner",
+        pipeline: [
+          {
+            $project: {
+              username: 1,
+              fullName: 1,
+              avatar: 1,
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        owner: {
+          $first: "$owner",
+        },
+      },
+    },
+  ]);
+
+  if (!video.length) {
+    throw new ApiError(404, "video does not exist ");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, video[0], "video fetched succesfully "));
 });
 
 const updateVideo = asyncHandler(async (req, res) => {
