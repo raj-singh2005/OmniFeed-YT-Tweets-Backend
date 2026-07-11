@@ -254,9 +254,12 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
+
   return res
     .status(200)
-    .json(200, req.user, "current user fetched successfully");
+    .json(
+      new ApiResponse(200,req.user,"current user fetched succesfully")
+    );
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -289,7 +292,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Avatar File is Missing");
   }
 
-  const newAvatar = uploadOnCloudinary(avatarLocalPath);
+  const newAvatar = await uploadOnCloudinary(avatarLocalPath);
   if (!newAvatar.url) {
     throw new ApiError(400, "Error While Uploading On Avatar");
   }
@@ -315,7 +318,7 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Avatar File is Missing");
   }
 
-  const newCoverImage = uploadOnCloudinary(coverImageLocalPath);
+  const newCoverImage = await uploadOnCloudinary(coverImageLocalPath);
   if (!newCoverImage.url) {
     throw new ApiError(400, "Error While Uploading Cover Image");
   }
