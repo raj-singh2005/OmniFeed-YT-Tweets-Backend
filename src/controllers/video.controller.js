@@ -4,7 +4,11 @@ import { User } from "../models/user.model.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import {
+  uploadOnCloudinary,
+  extractPublicId,
+  deleteFromCloudinary,
+} from "../utils/cloudinary.service.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   //reading input from query params
@@ -130,10 +134,7 @@ const publishAVideo = asyncHandler(async (req, res) => {
 
   if (!uploadedThumbnail) {
     if (uploadedVideoFile?.public_id) {
-      // You can export a quick delete function or call it directly if imported
-      await cloudinary.uploader.destroy(uploadedVideoFile.public_id, {
-        resource_type: "video",
-      });
+      await deleteFromCloudinary(uploadedVideoFile?.public_id, "video");
     }
     throw new ApiError(500, "thumbnail Upload failed");
   }
@@ -208,8 +209,75 @@ const getVideoById = asyncHandler(async (req, res) => {
 });
 
 const updateVideo = asyncHandler(async (req, res) => {
-  const { videoId } = req.params;
-  //TODO: update video details like title, description, thumbnail
+  // 1. Destructure videoId from req.params
+  // 2. Destructure title and description from req.body
+  // 3. Check if videoId is a valid MongoDB ObjectId structure
+  // 4. Find the video document in MongoDB
+  // 5. Check if the video document actually exists (404 guard)
+  // 6. Verify authorization (Check if logged-in user owns the video)
+  // 7. Capture local path for the new thumbnail if uploaded via Multer (req.file)
+  // 8. If new thumbnail exists, upload it to Cloudinary and check for failure
+  // 9. Extract public_id of the old thumbnail and delete it from Cloudinary
+  // 10. Save updated title, description, and new thumbnail URL to the document
+  // 11. Save the document and return the updated video response
+
+  const { videoId } = req.params || {};
+  const { title, description } = req.body || {};
+  if (!mongoose.Types.ObjectId.isValid(videoId)) {
+    throw new ApiError(400, "videoId is not valid");
+  }
+
+  const video = await Video.findById(videoId);
+  if (!video) {
+    throw new ApiError(404, "video with this VideoId does not exist");
+  }
+
+  if (!(video.owner?.toString() === req.user?._id?.toString())) {
+    throw new ApiError(403, "you are not authorized to update this video");
+  }
+
+  const thumbnailLocalPath = req.file?.path;
+  let uploadedThumbnail ;
+  if (thumbnailLocalPath) {
+    uploadedThumbnail = await uploadOnCloudinary(thumbnailLocalPath);
+    if (!uploadedThumbnail?.secure_url) {
+      throw new ApiError(
+        500,
+        "Failed to upload new thumbnail to cloud storage"
+      );
+    }
+  }
+
+  if(uploadedThumbnail){
+    if (video.thumbnail) {
+    const oldPublicId = extractPublicId(video.thumbnail);
+    if (oldPublicId) {
+      await deleteFromCloudinary(oldPublicId, "image");
+      console.log("old thumbnail deleted successfully");
+    }
+  }
+  }
+
+  if (title) {
+    video.title = title;
+  }
+  if (description) {
+    video.description = description;
+  }
+
+  if (uploadedThumbnail) {
+    video.thumbnail = uploadedThumbnail?.secure_url;
+  }
+
+  const updatedVideo = await video.save();
+
+  if (!updatedVideo) {
+    throw new ApiError(500, "video Update failed");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(201, updatedVideo, "video updated succesfully "));
 });
 
 const deleteVideo = asyncHandler(async (req, res) => {
