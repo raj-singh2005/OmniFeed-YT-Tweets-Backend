@@ -8,6 +8,8 @@ import {
 import {verifyJWT} from "../middlewares/auth.middleware.js"
 
 const router = Router();
+
+//secured routes
 router.use(verifyJWT); // Apply verifyJWT middleware to all routes in this file
 
 router.route("/").post(createTweet);
