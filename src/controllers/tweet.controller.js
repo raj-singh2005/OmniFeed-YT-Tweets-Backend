@@ -116,11 +116,82 @@ const getUserTweets = asyncHandler(async (req, res) => {
 });
 
 const updateTweet = asyncHandler(async (req, res) => {
-  //TODO: update tweet
+  //Destructure tweetId from req.params and content from req.body
+  //Check if tweetId matches a valid MongoDB ObjectId structure (400 guard)
+  //Validate content (ensure it exists and isn't just empty spaces)
+  //Find the tweet document in MongoDB (404 guard)
+  //Verify authorization (Check if logged-in user owns the tweet - 403 lock)
+  //Update tweet.content and save using { validateBeforeSave: false }
+  //Return a 200 OK success response along with the updated tweet details
+
+  const { tweetId } = req.params || {};
+  const { content } = req.body || {};
+
+  if (!mongoose.Types.ObjectId.isValid(tweetId)) {
+    throw new ApiError(400, "tweetId is not valid");
+  }
+
+  if (!content.trim()) {
+    throw new ApiError(400, "content is required");
+  }
+  const tweet = await Tweet.findById(tweetId);
+
+  if (!tweet) {
+    throw new ApiError(404, "this tweet does not exist");
+  }
+
+  if (!(tweet.owner?.toString() === req.user?._id?.toString())) {
+    throw new ApiError(403, "you are unathorized to update this tweet");
+  }
+
+  if (content) {
+    tweet?.content = content;
+  }
+
+  const updatedTweet = await tweet.save({ validateBeforeSave: false });
+
+  if (!updatedTweet) {
+    throw new ApiError(500, "tweet updation failed");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, updatedTweet, "tweet updated successfully"));
 });
 
 const deleteTweet = asyncHandler(async (req, res) => {
-  //TODO: delete tweet
+  //Destructure tweetId from req.params
+  //Validate if tweetId is a correct MongoDB ObjectId structure
+  //Find the tweet document in MongoDB (404 guard)
+  //Verify authorization (Check if logged-in user owns the tweet - 403 lock)
+  //Delete the tweet document using Tweet.findByIdAndDelete or tweet.deleteOne()
+  //Return a 200 OK success response confirming the deletion
+
+  const { tweetId } = req.params || {};
+  if (!mongoose.Types.ObjectId.isValid(tweetId)) {
+    throw new ApiError(400, "tweetId is not valid");
+  }
+
+  const tweet = await Tweet.findById(tweetId);
+  if (!tweet) {
+    throw new ApiError(404, "tweet does not exist");
+  }
+
+  if (!(tweet.owner?.toString() === req.user?._id?.toString())) {
+    throw new ApiError(403, "you are unathorized to delete this tweet");
+  }
+  let deletedTweet;
+  if (tweet) {
+    deletedTweet = await Tweet.findByIdAndDelete(tweetId);
+  }
+
+  if (!deletedTweet) {
+    throw new ApiError(500, "tweet deletion failed");
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, deletedTweet, "tweet deleted succesfully"));
 });
 
 export { createTweet, getUserTweets, updateTweet, deleteTweet };
