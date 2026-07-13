@@ -104,7 +104,95 @@ const toggleTweetLike = asyncHandler(async (req, res) => {
 });
 
 const getLikedVideos = asyncHandler(async (req, res) => {
-  //TODO: get all liked videos
+  const {
+    page = 1,
+    limit = 10,
+    sortBy = "createdAt",
+    sortType = "desc",
+  } = req.query || {};
+
+  const filterOptions = {
+    likedBy: req.user?._id,
+    video: { $exists: true },
+  };
+
+const likePipeline = Like.aggregate([
+    {
+      $match: filterOptions,
+    },
+    {
+      $lookup: {
+        from: "videos",
+        localField: "video",
+        foreignField: "_id",
+        as: "video",
+        pipeline: [
+          {
+            $lookup: {
+              from: "users",
+              localField: "owner",
+              foreignField: "_id",
+              as: "owner",
+              pipeline: [
+                {
+                  $project: {
+                    username: 1,
+                    fullName: 1,
+                    avatar: 1,
+                  },
+                },
+              ],
+            },
+          },
+          {
+            // Flatten the inner owner array to an object immediately
+            $addFields: {
+              owner: {
+                $first: "$owner",
+              },
+            },
+          },
+        ],
+      },
+    },
+    {
+      $addFields: {
+        video: {
+          $first: "$video",
+        },
+      },
+    },
+    {
+      $sort: {
+        [sortBy]: sortType === "asc" ? 1 : -1,
+      },
+    },
+  ]);
+
+  const paginationOptions = {
+    page: Number(page),
+    limit: Number(limit),
+  };
+
+  const result = await Like.aggregatePaginate(likePipeline, paginationOptions);
+
+  if (result && result.docs.length === 0) {
+   return res.status(200) 
+   .json(
+    new ApiResponse(200,null,"no liked videos found ! 404 ")
+   )
+  }
+
+  if (!result) {
+    throw new ApiError(
+      500,
+      "Internal server error during post pagination processing"
+    );
+  }
+
+  return res
+    .status(200)
+    .json(new ApiResponse(200, result, "liked videos fetched succesfully"));
 });
 
 export { toggleCommentLike, toggleTweetLike, toggleVideoLike, getLikedVideos };
