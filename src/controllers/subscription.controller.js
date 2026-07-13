@@ -113,10 +113,9 @@ const getUserChannelSubscribers = asyncHandler(async (req, res) => {
   ]);
 
   if (!subscriptionPipeline.length) {
-    return res.status(200)
-    .json(
-        new ApiResponse(200,[],"you have zero subscribers")
-    )
+    return res
+      .status(200)
+      .json(new ApiResponse(200, [], "you have zero subscribers"));
   }
 
   return res
@@ -178,10 +177,9 @@ const getSubscribedChannels = asyncHandler(async (req, res) => {
   ]);
 
   if (!subscriptionPipeline.length) {
-    return res.status(200)
-    .json(
-        new ApiResponse(200,[],"you do not have any subscribed channel")
-    )
+    return res
+      .status(200)
+      .json(new ApiResponse(200, [], "you do not have any subscribed channel"));
   }
 
   return res
