@@ -116,7 +116,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
     video: { $exists: true },
   };
 
-const likePipeline = Like.aggregate([
+  const likePipeline = Like.aggregate([
     {
       $match: filterOptions,
     },
@@ -177,10 +177,9 @@ const likePipeline = Like.aggregate([
   const result = await Like.aggregatePaginate(likePipeline, paginationOptions);
 
   if (result && result.docs.length === 0) {
-   return res.status(200) 
-   .json(
-    new ApiResponse(200,null,"no liked videos found ! 404 ")
-   )
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, "no liked videos found ! 404 "));
   }
 
   if (!result) {
