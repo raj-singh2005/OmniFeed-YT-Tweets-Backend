@@ -2,7 +2,11 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/apiError.js";
 import { User } from "../models/user.model.js";
 import { Video } from "../models/video.model.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.service.js";
+import {
+  deleteFromCloudinary,
+  extractPublicId,
+  uploadOnCloudinary,
+} from "../utils/cloudinary.service.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import JWT from "jsonwebtoken";
 import mongoose from "mongoose";
@@ -50,12 +54,11 @@ const registerUser = asyncHandler(async (req, res) => {
   if (existedUser) {
     throw new ApiError(409, "User with this email or username already exists");
   }
-let avatarLocalPath ;
-  if(req.files?.avatar?.[0]?.path){
+  let avatarLocalPath;
+  if (req.files?.avatar?.[0]?.path) {
     avatarLocalPath = req.files?.avatar[0]?.path;
   }
 
-  
   // const coverImgaeLocalPath = req.files?.coverImage[0]?.path;
   let coverImageLocalPath;
   if (
@@ -244,8 +247,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 const changeCurrentPassword = asyncHandler(async (req, res) => {
   const { oldPassword, newPassword } = req.body || {};
   const user = await User.findById(req.user._id);
-  const isOldPasswordCorrect =
-    await user.isPasswordCorrect(oldPassword);
+  const isOldPasswordCorrect = await user.isPasswordCorrect(oldPassword);
   if (!isOldPasswordCorrect) {
     throw new ApiError(401, "old password is incorrect");
   }
@@ -258,12 +260,9 @@ const changeCurrentPassword = asyncHandler(async (req, res) => {
 });
 
 const getCurrentUser = asyncHandler(async (req, res) => {
-
   return res
     .status(200)
-    .json(
-      new ApiResponse(200,req.user,"current user fetched succesfully")
-    );
+    .json(new ApiResponse(200, req.user, "current user fetched succesfully"));
 });
 
 const updateAccountDetails = asyncHandler(async (req, res) => {
@@ -296,24 +295,37 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     throw new ApiError(400, "Avatar File is Missing");
   }
 
+  const currentUser = await User.findById(req.user?._id);
+  const oldAvatarUrl = currentUser?.avatar;
+
   const newAvatar = await uploadOnCloudinary(avatarLocalPath);
   if (!newAvatar.url) {
-    throw new ApiError(400, "Error While Uploading On Avatar");
+    throw new ApiError(400, "Error While Uploading New Avatar");
   }
 
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
-      $set: {
-        avatar: newAvatar.url,
-      },
+      $set: { avatar: newAvatar.url },
     },
     { new: true }
   ).select("-password -refreshToken");
 
+  if (oldAvatarUrl) {
+    const oldPublicId = extractPublicId(oldAvatarUrl);
+    if (oldPublicId) {
+      deleteFromCloudinary(oldPublicId).catch((err) =>
+        console.error(
+          `Background asset deletion failed for publicId [${oldPublicId}]:`,
+          err
+        )
+      );
+    }
+  }
+
   return res
     .status(200)
-    .json(new ApiResponse(200, user, "Avatar Updated Succesfully"));
+    .json(new ApiResponse(200, user, "Avatar Updated Successfully"));
 });
 
 const updateUserCoverImage = asyncHandler(async (req, res) => {
@@ -321,6 +333,9 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   if (!coverImageLocalPath) {
     throw new ApiError(400, "coverImage File is Missing");
   }
+
+  const currentUser = await User.findById(req.user?._id);
+  const oldCoverImageUrl = currentUser?.coverImage;
 
   const newCoverImage = await uploadOnCloudinary(coverImageLocalPath);
   if (!newCoverImage.url) {
@@ -330,16 +345,27 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
   const user = await User.findByIdAndUpdate(
     req.user?._id,
     {
-      $set: {
-        coverImage: newCoverImage.url,
-      },
+      $set: { coverImage: newCoverImage.url },
     },
     { new: true }
   ).select("-password -refreshToken");
 
+  const oldPublicId = extractPublicId(oldCoverImageUrl);
+  if (user?.coverImage) {
+    const oldPublicId = extractPublicId(oldCoverImageUrl);
+    if (oldPublicId) {
+      deleteFromCloudinary(oldPublicId).catch((err) =>
+        console.error(
+          `Background asset deletion failed for publicId [${oldPublicId}]:`,
+          err
+        )
+      );
+    }
+  }
+
   return res
     .status(200)
-    .json(new ApiResponse(200, user, "Cover Image Updated Succesfully"));
+    .json(new ApiResponse(200, user, "Cover Image Updated Successfully"));
 });
 
 const getUserChannelProfile = asyncHandler(async (req, res) => {
@@ -519,5 +545,5 @@ export {
   updateUserCoverImage,
   getUserChannelProfile,
   getWatchHistory,
-  addToWatchHistory
+  addToWatchHistory,
 };
