@@ -798,6 +798,19 @@ The authentication system includes:
 * Protected Route Middleware
 * Sensitive Field Projection Removal
 
+# 🚀 Key Features
+
+* JWT Authentication
+* Refresh Token Rotation
+* Role-Based Access Control
+* Cloudinary Media Storage
+* MongoDB Aggregation Pipelines
+* Centralized Error Handling
+* RESTful API Design
+* Modular Project Structure
+* API Versioning
+* Secure File Upload Pipeline
+
 ## 🔮 Future Enhancements
 
 - Redis Caching
