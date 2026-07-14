@@ -351,7 +351,19 @@ try {
 
 This guarantees that temporary files are deleted regardless of upload success or failure.
 
+
 ---
+## ⚡ Performance Optimizations
+
+- MongoDB Aggregation Pipelines
+- Database Indexing
+- Selective Field Projection
+- Pagination Support
+- Cloud CDN Media Delivery
+- Stateless Authentication
+- Request Payload Limits
+- Async Error Handling
+```
 
 # 🔀 API Modules
 
@@ -368,7 +380,7 @@ This guarantees that temporary files are deleted regardless of upload success or
 | `/api/v1/dashboard`     | Protected    | Analytics and creator statistics      |
 
 ---
-
+```
 ## 📌 Complete API Endpoints Reference
 
 All request pathways are strictly prefixed under the explicit routing layer `GET/POST/PATCH/DELETE /api/v1`. 
@@ -515,6 +527,29 @@ OmniFeed-ytTweets/
 └── readme.md                 # Complete primary documentation portal
 ```
 
+## ⚙️ Environment Variables Setup
+
+Create a file named `.env` in the root directory of your project and populate it with the following configuration details:
+
+```env
+PORT=8000
+CORS_ORIGIN=*
+
+# MongoDB Connection String
+MONGODB_URI=mongodb+srv://
+# Cryptographic JSON Web Token Configuration
+ACCESS_TOKEN_SECRET=
+ACCESS_TOKEN_EXPIRY=1d
+REFRESH_TOKEN_SECRET=
+REFRESH_TOKEN_EXPIRY=10d
+
+# Cloudinary CDN Configuration Assets
+CLOUDINARY_CLOUD_NAME=
+CLOUDINARY_API_KEY=
+CLOUDINARY_API_SECRET=
+
+```
+
 ## 🔐 Authentication & Token Lifecycle
 
 The authentication system follows a **dual-token JWT architecture** that separates short-lived authorization credentials from long-lived session credentials.
@@ -538,7 +573,7 @@ The application uses two independent JWTs with different responsibilities.
 | **Access Token**  | `1 day`   | HTTP Header or Secure Cookie       | Authorizes API requests and contains non-sensitive user claims.      |
 | **Refresh Token** | `10 days` | HTTP-Only Secure Cookie + Database | Generates new access tokens without requiring users to log in again. |
 
----
+---```
 
 ## 📝 Registration Flow
 
@@ -762,6 +797,18 @@ The authentication system includes:
 * Session Invalidation
 * Protected Route Middleware
 * Sensitive Field Projection Removal
+
+## 🔮 Future Enhancements
+
+- Redis Caching
+- WebSocket Notifications
+- Video Transcoding Pipeline
+- Recommendation Engine
+- Elasticsearch Integration
+- Distributed Queue Workers
+- Rate Limiting
+- API Documentation using Swagger
+
 
 
 # 🏁 Conclusion
