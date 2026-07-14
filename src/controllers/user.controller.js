@@ -50,8 +50,12 @@ const registerUser = asyncHandler(async (req, res) => {
   if (existedUser) {
     throw new ApiError(409, "User with this email or username already exists");
   }
+let avatarLocalPath ;
+  if(req.files?.avatar?.[0]?.path){
+    avatarLocalPath = req.files?.avatar[0]?.path;
+  }
 
-  const avatarLocalPath = req.files?.avatar[0]?.path;
+  
   // const coverImgaeLocalPath = req.files?.coverImage[0]?.path;
   let coverImageLocalPath;
   if (
@@ -315,7 +319,7 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
 const updateUserCoverImage = asyncHandler(async (req, res) => {
   const coverImageLocalPath = req.file?.path;
   if (!coverImageLocalPath) {
-    throw new ApiError(400, "Avatar File is Missing");
+    throw new ApiError(400, "coverImage File is Missing");
   }
 
   const newCoverImage = await uploadOnCloudinary(coverImageLocalPath);
