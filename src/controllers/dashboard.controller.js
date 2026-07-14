@@ -132,7 +132,7 @@ const getChannelVideos = asyncHandler(async (req, res) => {
   //3. Fetch all Video documents where the owner field matches the validated channelId
   //4. Return a 200 OK response wrapping the array of videos inside ApiResponse
 
-  const { channelId } = req.params || {};
+  const channelId = req.user?._id
 
   if (!mongoose.Types.ObjectId.isValid(channelId)) {
     throw new ApiError(400, "channelId is invalid");
