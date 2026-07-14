@@ -144,8 +144,8 @@ const updateTweet = asyncHandler(async (req, res) => {
     throw new ApiError(403, "you are unathorized to update this tweet");
   }
 
-  if (content) {
-    tweet?.content = content;
+  if (content.trim() && tweet) {
+    tweet.content = content;
   }
 
   const updatedTweet = await tweet.save({ validateBeforeSave: false });
