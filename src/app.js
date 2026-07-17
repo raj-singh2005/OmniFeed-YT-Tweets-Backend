@@ -33,7 +33,7 @@ app.use(cookieParser());
 import userRouter from "./routes/user.routes.js";
 import videoRouter from "./routes/video.routes.js";
 import tweetRouter from "./routes/tweet.routes.js";
-import healthcheckRouter from "./routes/healthcheck.routes.js";
+import healthcheckRouter from "./routes/healthCheck.routes.js";
 import subscriptionRouter from "./routes/subscription.routes.js";
 import likeRouter from "./routes/like.routes.js";
 import commentRouter from "./routes/comment.routes.js";
