@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  # 1. Custom Express Application Microservice
+  omnifeed-backend:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis-cache:6379
+    depends_on:
+      - redis-cache
+
+  # 2. Redis Caching Microservice
+  redis-cache:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
