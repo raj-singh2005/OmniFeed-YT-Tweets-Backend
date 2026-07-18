@@ -9,6 +9,7 @@ import {
   extractPublicId,
   deleteFromCloudinary,
 } from "../utils/cloudinary.service.js";
+import { cacheManager } from "../redis/cache.utils.js";
 
 const getAllVideos = asyncHandler(async (req, res) => {
   //reading input from query params
@@ -20,6 +21,22 @@ const getAllVideos = asyncHandler(async (req, res) => {
     sortType = "desc",
     userId,
   } = req.query; //desc = newest first
+console.log("🔍 Debugging Incoming Query Params:", { page, limit, query, userId, isPageNumber: typeof page });
+  const isHomePageRequest =
+    !query && !userId && Number(page) === 1 && Number(limit) === 10;
+  const cacheKey = "videos:homepage:default";
+  if (isHomePageRequest) {
+    const cachedResult = await cacheManager.get(cacheKey);
+    if (cachedResult) {
+      console.log(
+        "⚡ [Redis Cache Hit]: Serving default homepage video feed from memory"
+      );
+      return res.status(cachedResult.statusCode).json(cachedResult);
+    }
+    console.log(
+      "🐢 [Redis Cache Miss]: Homepage cache empty. Processing MongoDB pipeline"
+    );
+  }
 
   //FEATURE 1: THE HOME PAGE (Default State)
   const filterConditions = {
@@ -93,6 +110,11 @@ const getAllVideos = asyncHandler(async (req, res) => {
     paginationOptions
   );
 
+  if (isHomePageRequest) {
+    // 300 seconds = 5 minutes TTL
+    cacheManager.set(cacheKey, result, 300);
+  }
+
   return res
     .status(200)
     .json(new ApiResponse(200, result, "Videos fetched succesfully "));
@@ -155,6 +177,9 @@ const publishAVideo = asyncHandler(async (req, res) => {
     throw new ApiError(501, "failed to publish video");
   }
 
+  const cacheKey = `dashboard:videos:${req.user?._id}`;
+  cacheManager.delete(cacheKey);
+
   return res
     .status(201)
     .json(new ApiResponse(201, createdVideo, "video published successfully"));
@@ -202,6 +227,8 @@ const getVideoById = asyncHandler(async (req, res) => {
   if (!video.length) {
     throw new ApiError(404, "video does not exist ");
   }
+
+  cacheManager.delete(`user:history:${req.user?._id}`);
 
   return res
     .status(200)
@@ -269,11 +296,13 @@ const updateVideo = asyncHandler(async (req, res) => {
     video.thumbnail = uploadedThumbnail?.secure_url;
   }
 
-  const updatedVideo = await video.save({validateBeforeSave:false});
+  const updatedVideo = await video.save({ validateBeforeSave: false });
 
   if (!updatedVideo) {
     throw new ApiError(500, "video Update failed");
   }
+  const cacheKey = `dashboard:videos:${req.user?._id}`;
+  cacheManager.delete(cacheKey);
 
   return res
     .status(200)
@@ -333,7 +362,8 @@ const deleteVideo = asyncHandler(async (req, res) => {
       );
     }
   }
-
+  const cacheKey = `dashboard:videos:${req.user?._id}`;
+  cacheManager.delete(cacheKey);
   return res
     .status(200)
     .json(
