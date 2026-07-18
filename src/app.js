@@ -2,6 +2,7 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import path from "path";
+import redis from "./redis/redis.js";
 
 const app = express();
 
@@ -51,5 +52,29 @@ app.use("/api/v1/like", likeRouter);
 app.use("/api/v1/comment", commentRouter);
 app.use("/api/v1/playlist", playlistRouter);
 app.use("/api/v1/dashboard", dashboardRouter);
+
+// //redis testing endpoints
+
+// app.get("/api/v1/cache-test",async (req,res)=>{
+//   await redis.setex("framework",60,"express.js") ;
+//   return res.json({
+//     message : "data successfully saved to redis for the 60 sescs"
+//   })
+// }) ;
+
+// app.get("/api/v1/get-test",async (req,res) => {
+//   const cachedValue = await redis.get("framework") ;
+
+//   if(!cachedValue){
+//     return res.json({
+//       message : "Cache Miss ! The data has expired or doesnt exist" 
+//     })
+//   }
+
+//   return res.json({
+//     message : "cahche Hit" ,
+//     data : cachedValue
+//   })
+// })
 
 export { app };
