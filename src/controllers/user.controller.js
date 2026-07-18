@@ -10,6 +10,7 @@ import {
 import { ApiResponse } from "../utils/apiResponse.js";
 import JWT from "jsonwebtoken";
 import mongoose from "mongoose";
+import { cacheManager } from "../redis/cache.utils.js";
 
 const generateAccessAndRefreshToken = async (userId) => {
   try {
@@ -186,6 +187,9 @@ const logoutUser = asyncHandler(async (req, res) => {
     secure: true,
   };
 
+  const cacheKey = `user:profile:${req.user?.username?.toLowerCase()}`;
+  cacheManager.delete(cacheKey);
+
   return res
     .status(200)
     .clearCookie("accessToken", options)
@@ -282,6 +286,9 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
     },
     { new: true }
   ).select("-password -refreshToken");
+
+  const cacheKey = `user:profile:${req.user?.username?.toLowerCase()}`;
+  cacheManager.delete(cacheKey);
   return res
     .status(200)
     .json(
@@ -323,6 +330,9 @@ const updateUserAvatar = asyncHandler(async (req, res) => {
     }
   }
 
+  const cacheKey = `user:profile:${req.user?.username?.toLowerCase()}`;
+  cacheManager.delete(cacheKey);
+
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Avatar Updated Successfully"));
@@ -363,6 +373,9 @@ const updateUserCoverImage = asyncHandler(async (req, res) => {
     }
   }
 
+  const cacheKey = `user:profile:${req.user?.username?.toLowerCase()}`;
+  cacheManager.delete(cacheKey);
+
   return res
     .status(200)
     .json(new ApiResponse(200, user, "Cover Image Updated Successfully"));
@@ -372,6 +385,19 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
   const { username } = req.params;
   if (!username?.trim()) {
     throw new ApiError(400, "Usrename is MIssing");
+  }
+
+  const isOwnerRequest =
+    req.user?.username?.toLowerCase() === username?.toLowerCase();
+  const cacheKey = `user:profile:${username?.toLowerCase()}`;
+
+  if (isOwnerRequest) {
+    const cachedResult = await cacheManager.get(cacheKey);
+    if (cachedResult) {
+      console.log("⚡ [Redis Cache Hit]: Serving channel profile to the owner");
+      return res.status(cachedResult.statusCode).json(cachedResult);
+    }
+    console.log("🐢 [Redis Cache Miss]: Loading channel profile from MongoDB");
   }
 
   const channel = await User.aggregate([
@@ -433,6 +459,10 @@ const getUserChannelProfile = asyncHandler(async (req, res) => {
     throw new ApiError(404, "channel does not exists");
   }
 
+  if (isOwnerRequest) {
+    cacheManager.set(cacheKey, channel[0], 1800); // Cached for 30 mins
+  }
+
   return res
     .status(200)
     .json(
@@ -468,6 +498,8 @@ const addToWatchHistory = asyncHandler(async (req, res) => {
   video.views += 1;
   await video.save({ validateBeforeSave: false });
 
+  cacheManager.delete(`user:history:${req.user?._id}`);
+
   return res
     .status(200)
     .json(
@@ -480,6 +512,17 @@ const addToWatchHistory = asyncHandler(async (req, res) => {
 });
 
 const getWatchHistory = asyncHandler(async (req, res) => {
+  const cacheKey = `user:history:${req.user?._id}`;
+
+  const cachedResult = await cacheManager.get(cacheKey);
+  if (cachedResult) {
+    console.log("⚡ [Redis Cache Hit]: Serving watch history from memory");
+    return res.status(cachedResult.statusCode).json(cachedResult);
+  }
+
+  console.log(
+    "🐢 [Redis Cache Miss]: Fetching nested watch history from MongoDB"
+  );
   const user = await User.aggregate([
     {
       $match: {
@@ -521,6 +564,10 @@ const getWatchHistory = asyncHandler(async (req, res) => {
       },
     },
   ]);
+
+  if (user?.[0]?.watchHistory) {
+    cacheManager.set(cacheKey, user[0].watchHistory, 300);
+  }
 
   return res
     .status(200)

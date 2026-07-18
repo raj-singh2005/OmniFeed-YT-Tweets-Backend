@@ -5,6 +5,7 @@ import { Like } from "../models/like.model.js";
 import { ApiError } from "../utils/apiError.js";
 import { ApiResponse } from "../utils/apiResponse.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { cacheManager } from "../redis/cache.utils.js";
 
 const getChannelStats = asyncHandler(async (req, res) => {
   //1. Grab the channel/user ID from req.user?._id (Ensure user is authenticated)
@@ -132,16 +133,25 @@ const getChannelVideos = asyncHandler(async (req, res) => {
   //3. Fetch all Video documents where the owner field matches the validated channelId
   //4. Return a 200 OK response wrapping the array of videos inside ApiResponse
 
-  const channelId = req.user?._id
+  const channelId = req.user?._id;
 
   if (!mongoose.Types.ObjectId.isValid(channelId)) {
     throw new ApiError(400, "channelId is invalid");
   }
 
+  const cacheKey = `dashboard:videos:${channelId}`;
+
+  const cachedResult = await cacheManager.get(cacheKey);
+  if (cachedResult) {
+    console.log("redis cache hit in get channel videos");
+    return res.status(cachedResult.statusCode).json(cachedResult);
+  }
+  console.log("redis miss in get channel videos !! moving to mongoDB");
+
   const videos = await Video.find({
     owner: channelId,
   });
-
+  cacheManager.set(cacheKey, videos, 1800);
   if (!videos?.length) {
     return res
       .status(200)
