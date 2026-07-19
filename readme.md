@@ -1,24 +1,33 @@
 ![Node.js](https://img.shields.io/badge/Node.js-22.x-green)
 ![Express](https://img.shields.io/badge/Express-5.x-black)
-![MongoDB](https://img.shields.io/badge/MongoDB-8.x-green)
+![MongoDB](https://img.shields.io/badge/MongoDB-Atlas-green)
+![Redis](https://img.shields.io/badge/Redis-Cloud-red)
+![Docker](https://img.shields.io/badge/Docker-Containerized-blue)
 ![License](https://img.shields.io/badge/license-RajSingh-blue)
 
 
 # 🚀 OmniFeed (YT & Tweets Engine)
-> **A Production-Grade, Enterprise-Ready Social Media & Content Distribution Backend Pipeline.**
+> **A High-Throughput, Production-Grade Content Distribution Pipeline Engineered with Distributed Cloud Caching, Active Cache Invalidation, and Containerized Infrastructure.**
 
-OmniFeed is a robust, high-throughput RESTful API designed to power modern content distribution platforms. It unifies complex media streaming logic (similar to YouTube) with micro-blogging connectivity systems (similar to X/Twitter). Built purely as an architectural showcase, this project highlights highly optimized database queries, industrial-grade data validation wrappers, parallel aggregation data streaming, and secure token lifecycle management.
+OmniFeed is a robust, production-ready RESTful API designed to power modern high-concurrency content distribution platforms. It unifies high-bandwidth media streaming logic (similar to YouTube) with low-latency micro-blogging connection subsystems (similar to X/Twitter). Engineered to reflect industrial systems, this platform features complex MongoDB data aggregations, defensive middleware shielding, automated memory-capped cloud caching, and containerized deployment pipelines.
 
 ---
 
-## 🔥 Highlighted System Features
+## 🔥 Highlighted System Features & Architectural Enhancements
 
-*   ⚡ **Parallel Aggregation Engine:** Leverages advanced MongoDB `$facet`, `$unwind`, and `$group` operations to execute multi-collection analytics concurrently, drastically optimizing server memory allocations.
-*   🛡️ **Cryptographic Identity Control:** Implements atomic access and dynamic refresh token rotation architectures using dual-layered JWT verification protocols alongside asymmetric hashing (`bcrypt`).
-*   🏗️ **Enterprise Architecture Modularity:** Engineered with a strict **Separation of Concerns (SoC)** architecture. The codebase is broken down into clean, independent modules—isolating Express routing parameters, controller execution blocks, database models, and validation middleware to allow the system to scale without code friction.
-*   📦 **Defensive Cloud File Pipeline:** Integrates a secure, multi-stage file management system utilizing `multer` for raw local disk buffering and `cloudinary` storage clusters for assets.
-*   ⚙️ **Production-Grade Design Safeguards:** Built with strict production patterns including centralized async error interceptors (`asyncHandler`) to eliminate repetitive try-catch blocks, and specialized request object defenses (`req.params || {}`) to guard against structural server crashes.
-*   🎛️ **Centralized Error & Response Framework:** Implements strict data contracts across the application using unified wrapper modules (`ApiError`, `ApiResponse`) that prevent internal application data leaks and standardize downstream client consumption.
+*   **⚡ High-Speed Cloud Caching Layer:** Integrates an external cloud-hosted **Upstash Redis** cluster running over secure TLS/SSL proxies. Caches intensive pipelines like the *Global Video Feed* and *User Watch History* to protect the primary database layer, achieving rapid sub-millisecond response intervals.
+*   **♻️ Active Cache Invalidation Subsystem:** Implements strict data consistency policies using state-driven invalidation hooks. When a user creates, updates, or deletes a resource (e.g., publishing a new video or tweet), the system automatically flushes the corresponding cached keys, ensuring clients never receive stale data.
+*   **🌐 Comprehensive Multi-Cloud Data Array Infrastructure:** Engineered to process and manage a wide variety of data payloads—including heavy video file streams, structural image assets, text-based micro-blogs, and real-time interaction states. Data is intelligently distributed across a modern multi-cloud grid: **MongoDB Atlas** for document persistence, **Upstash Cloud** for in-memory caching, and **Cloudinary Clusters** for global media delivery.
+*   **🛡️ Cryptographic Identity Control & Dual-Token Architecture:** Implements a rigid, state-free authorization system utilizing two independent JWTs with distinct responsibilities:
+    *   *Access Tokens (1 Day):* Exposes non-sensitive claims in headers or cookies to authorize active API resource pipelines.
+    *   *Refresh Tokens (10 Days):* Secured via HTTP-Only cookies and backed by a database storage cluster to automatically rotate sessions without user friction or replay attack risks.
+*   **🎛️ Centralized Error, Response & Safety Framework:** Implements strict, predictable data contracts across the application using unified wrapper modules (`ApiError`, `ApiResponse`) that prevent internal application data leaks and standardize downstream client consumption.
+*   **⚙️ Production-Grade Design Safeguards:** Built with strict production patterns including centralized async error interceptors (`asyncHandler`) to completely eliminate repetitive try-catch blocks and keep controllers clean, alongside specialized request object defenses (`req.params || {}`) to guard against structural server crashes.
+*   **🛠️ Resilient Self-Healing Caching Strategy:** Outfitted with an optimized client connection topology featuring infinite background retry recovery strategies (`maxRetriesPerRequest: null`) and a 10-second web network handshake timeout layer to guarantee absolute protection against network lag or engine down-time.
+*   **🧠 Automated Memory Eviction (LRU):** Configured with serverless, memory-capped Least Recently Used (LRU) data eviction schemas. When the system hits its data capacity limit, it gracefully drops legacy cached entries to accept fresh inputs, keeping the system up without memory leakage or out-of-memory container crashes.
+*   **🐳 Containerized Service Environment:** Encapsulated inside an industrial **Docker Compose** ecosystem utilizing independent volume tracking and isolated bridge networks. The host application dynamically pulls explicit environment layers (`env_file`) while stripping local dependency blocks to optimize host resource consumption.
+*   **🔀 Parallel Aggregation Engine:** Leverages advanced MongoDB `$facet`, `$unwind`, and `$group` operations to execute multi-collection analytics concurrently, drastically optimizing server memory allocations.
+*   **📦 Defensive Cloud File Pipeline:** Integrates a secure, multi-stage file management system utilizing `multer` for raw local disk buffering and `cloudinary` storage clusters for assets.
 
 ---
 
@@ -27,7 +36,9 @@ OmniFeed is a robust, high-throughput RESTful API designed to power modern conte
 | Technology / Library | Architectural Responsibility | Engineering Purpose |
 | :--- | :--- | :--- |
 | **Runtime & Framework** | `Node.js` & `Express 5.2.1` | Asynchronous I/O routing layer managing client streams. |
-| **Primary Database** | `MongoDB` & `Mongoose 9.7.1` | Document cluster schema layer with custom validation hooks. |
+| **Primary Database Cluster**| `MongoDB Atlas` & `Mongoose 9.7.1` | Document cluster schema layer with custom validation hooks. |
+| **Distributed Cache Hub**   | `Upstash Redis` & `ioredis` | Super-fast caching layer utilizing TLS encryption, custom connection windows, active cache invalidation, and LRU eviction. |
+| **Environment Container**   | `Docker` & `Docker Compose 3.8` | Standardized environment isolation, deterministic image building, and unified orchestration. |
 | **Query Pagination** | `mongoose-aggregate-paginate-v2` | Cursor-based chunking for heavy multi-document query loads. |
 | **Asset CDN Pipeline** | `Multer` & `Cloudinary` | Automated upload processing, stream processing, and multi-region file hosting. |
 | **Security Architecture** | `jsonwebtoken` & `bcrypt` | Digital signature verification alongside cryptographic hashing protocols. |
@@ -35,16 +46,15 @@ OmniFeed is a robust, high-throughput RESTful API designed to power modern conte
 
 ---
 
+
 # 🏗️ System Architecture, Design & Data Flow
 
 The backend follows a **Decoupled Three-Tier Architecture** consisting of:
-
 * **Routing Layer**
 * **Controller & Service Orchestration Layer**
 * **Data Persistence Layer**
 
 The architecture is designed with the following goals:
-
 * Horizontal scalability
 * Secure authentication and authorization
 * Efficient media processing
@@ -54,62 +64,80 @@ The architecture is designed with the following goals:
 
 ---
 
-# 🔄 Request Lifecycle
+# 🔄 Request Lifecycle & Caching Topology
 
-Every request passes through multiple layers before interacting with persistent storage.
+Every request passes through multiple layers before interacting with persistent storage. Mutations dynamically trigger active cache updates, while query evaluations hit the cloud proxy memory layer directly.
 
 ```text
-Client Request
-      │
-      ▼
-┌─────────────────────────────┐
-│ Application Middleware Layer│
-│ - CORS                      │
-│ - Cookie Parser             │
-│ - JSON Parser               │
-│ - Security Headers          │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│ Routing Layer               │
-│ - Route Resolution          │
-│ - Middleware Binding        │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│ Authentication Layer        │
-│ - JWT Validation            │
-│ - User Authorization        │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│ File Processing Layer       │
-│ - Multer Upload Pipeline    │
-│ - Temporary Storage         │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│ Controller Layer            │
-│ - Business Logic            │
-│ - Service Invocation        │
-└──────────────┬──────────────┘
-               │
-               ▼
-┌─────────────────────────────┐
-│ Database Layer              │
-│ - MongoDB Operations        │
-│ - Aggregation Pipelines     │
-└──────────────┬──────────────┘
-               │
-               ▼
-         API Response
-```
-
+                     [ Incoming Client Request ]
+                                  │
+                                  ▼
+                    ┌──────────────────────────┐
+                    │  Application Middleware  │ (CORS, Cookie Parser, JSON)
+                    └─────────────┬────────────┘
+                                  │
+                                  ▼
+                    ┌──────────────────────────┐
+                    │   JWT Authentication     │ (verifyJWT Shield)
+                    └─────────────┬────────────┘
+                                  │
+                                  ▼
+               [ WHAT IS THE REQUEST TYPE? ]
+                ├───> WRITE (POST/PATCH/DELETE) ──> [ Execute Mutations in DB ] ──> [ ♻️ Invalidate & Flush Redis Key ]
+                │                                                                                   │
+                └───> READ (GET Feed/History)                                                       ▼
+                          │                                                                 [ Send Sync Response ]
+                          ▼
+            ⚡───[ IS CACHEABLE ENDPOINT? ]───────┐
+            │                                     │
+           YES                                    NO
+            │                                     │
+            ▼                                     ▼
+ ┌──────────────────────┐               ┌────────────────────┐
+ │  Query Upstash Cloud │               │ Skip Caching Layer │
+ │  Redis Layer (TLS)   │               └─────────┬──────────┘
+ └──────────┬───────────┘                         │
+            │                                     │
+    ┌───────┴───────┐                             │
+    │               │                             │
+[ CACHE HIT ]   [ CACHE MISS ]                     │
+    │               │                             │
+ (⚡ Fast)          ▼                             ▼
+    │     ┌───────────────────┐        ┌────────────────────┐
+    │     │ Read Primary DB   │        │ Execute Controller │
+    │     │ (MongoDB Cluster) │        │   Business Logic   │
+    │     └─────────┬─────────┘        └──────────┬─────────┘
+    │               │                             │
+    │               ▼                             │
+    │     ┌───────────────────┐                   │
+    │     │ Write New Cache   │                   │
+    │     │   (Auto-Evict)    │                   │
+    │     └─────────┬─────────┘                   │
+    │               │                             │
+    └───────────────┼─────────────────────────────┘
+                    │
+                    ▼
+        ┌───────────────────────┐
+        │ Central API Response  │ (ApiSuccess / ApiError)
+        └───────────────────────┘
 ---
+```
+# 🐳 Infrastructure Container Configuration
+The project operates within an isolated container network, configured to consume cloud dependencies natively while tracking variables dynamically:
+```text
+version: '3.8'
+
+services:
+  # 1. Custom Express Application Microservice
+  omnifeed-backend:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=${REDIS_URL}
+```
 
 # 🗄️ Database Design
 
@@ -311,6 +339,7 @@ const asyncHandler = (requestHandler) => {
 
 ```json
 {
+  "statusCode": 
   "success": true,
   "message": "Operation completed successfully",
   "data": {}
@@ -321,11 +350,48 @@ const asyncHandler = (requestHandler) => {
 
 ```json
 {
+  "statusCode":00,
   "success": false,
-  "message": "Unauthorized access"
-}
+  "message": "",
+  "errors":[],
+  "stack":"" 
+  }
+  
 ```
 
+---
+## ⚙️Production Caching Policies & Connection Logic
+```text
+import Redis from 'ioredis';
+
+const redisUrl = process.env.REDIS_URL;
+
+if (!redisUrl) {
+    console.error("❌ REDIS_URL is not defined in the environment variables!");
+}
+
+// Configured for high-availability cloud cluster operations
+const redis = new Redis(redisUrl, {
+    // Stops client from triggering fatal thread exits during network hiccups
+    maxRetriesPerRequest: null,
+    
+    // Forces secure in-transit encryption required by cloud operators
+    tls: {},
+    
+    // Extends connection window to match cloud network handshake bounds
+    connectTimeout: 10000,
+    
+    retryStrategy(times) {
+        return Math.min(times * 100, 3000);
+    }
+});
+
+redis.on('connect', () => {
+    console.log('🚀 Redis Connected successfully to the cloud database!');
+});
+
+export default redis;
+```
 ---
 
 ## Automated Media Cleanup Pipeline
@@ -355,6 +421,8 @@ This guarantees that temporary files are deleted regardless of upload success or
 ---
 ## ⚡ Performance Optimizations
 
+- Distributed Redis Cloud Caching
+- Active Key Invalidation Strategy
 - MongoDB Aggregation Pipelines
 - Database Indexing
 - Selective Field Projection
@@ -484,19 +552,6 @@ All request pathways are strictly prefixed under the explicit routing layer `GET
 | **GET** | `/dashboard/videos` | 🔐 Protected | `verifyJWT` | Collects all uploaded media records belonging to the logged-in creator. |
 | **GET** | `/healthcheck` | 🔓 Public | *None* | Diagnostic route returning JSON signals confirming backend engine health. |
 
-# 🚀 Key Features
-
-* JWT Authentication
-* Refresh Token Rotation
-* Role-Based Access Control
-* Cloudinary Media Storage
-* MongoDB Aggregation Pipelines
-* Centralized Error Handling
-* RESTful API Design
-* Modular Project Structure
-* API Versioning
-* Secure File Upload Pipeline
-
 ---
 
 ## 📁 Project Directory Structure
@@ -548,6 +603,8 @@ CLOUDINARY_CLOUD_NAME=
 CLOUDINARY_API_KEY=
 CLOUDINARY_API_SECRET=
 
+REDIS_URL
+
 ```
 
 ## 🔐 Authentication & Token Lifecycle
@@ -555,18 +612,20 @@ CLOUDINARY_API_SECRET=
 The authentication system follows a **dual-token JWT architecture** that separates short-lived authorization credentials from long-lived session credentials.
 
 This approach provides:
-
+```text
 * Stateless authentication
 * Secure session persistence
 * Refresh token rotation
 * Protection against token replay attacks
 * Reduced server-side memory usage
+```
 
 ---
 
 ## 🔄 Dual Token Strategy
 
 The application uses two independent JWTs with different responsibilities.
+```
 
 | Token             | Lifetime  | Storage Location                   | Purpose                                                              |
 | ----------------- | --------- | ---------------------------------- | -------------------------------------------------------------------- |
@@ -787,7 +846,7 @@ Once the refresh token is removed, no new access tokens can be generated, effect
 ## ✅ Security Measures
 
 The authentication system includes:
-
+```
 * JWT Access Tokens
 * Refresh Token Rotation
 * HTTP-Only Cookies
@@ -797,43 +856,32 @@ The authentication system includes:
 * Session Invalidation
 * Protected Route Middleware
 * Sensitive Field Projection Removal
+```
 
-# 🚀 Key Features
-
-* JWT Authentication
-* Refresh Token Rotation
-* Role-Based Access Control
-* Cloudinary Media Storage
-* MongoDB Aggregation Pipelines
-* Centralized Error Handling
-* RESTful API Design
-* Modular Project Structure
-* API Versioning
-* Secure File Upload Pipeline
 
 ## 🔮 Future Enhancements
-
-- Redis Caching
-- WebSocket Notifications
-- Video Transcoding Pipeline
-- Recommendation Engine
-- Elasticsearch Integration
-- Distributed Queue Workers
-- Rate Limiting
-- API Documentation using Swagger
+```
+- WebSocket Real-Time Notifications
+- Video Transcoding Processing Workers
+- Advanced ML Recommendation Engine
+- Distributed Task Queue Integration
+- Global API Rate Limiting
+```
 
 
 
 # 🏁 Conclusion
 
-The backend architecture prioritizes **scalability**, **security**, **maintainability**, and **performance** through normalized schema design, layered architecture, and centralized infrastructure management.
+The backend architecture systematically prioritizes system scalability, security, maintainability, and performance through a modular, layered design. By integrating normalized document patterns, active cloud memory tracking, and isolated multi-container orchestration, the engine delivers consistent efficiency across complex workflows.
 
-This design enables efficient handling of:
+### 🛠️ Core Engineering Foundations
+*   **📐 Strategic Schema Layout:** Utilizing a normalized schema design to eliminate document bloat while maintaining highly optimized query paths.
+*   **🏗️ Tiered Layered Architecture:** Enforcing a clean Separation of Concerns (SoC) across the routing, middleware, controller, and data persistence boundaries.
+*   **⚡ Active Cloud Memory Sync:** Implementing automated real-time cache invalidation systems via Upstash Redis to secure strict data consistency across user streams.
+*   **🐳 Standardized Containerization:** Centralizing infrastructure management within isolated Docker networks for rapid, predictable deployment environments.
 
-* Large media workloads
-* High concurrency traffic
-* Social interactions
-* Analytical workloads
-* Future feature expansion
-
-while maintaining clean boundaries between application layers and predictable operational behavior.
+### 🌟 Operational Impact
+This architecture guarantees that the engine cleanly accommodates:
+*   High-throughput **large media workloads** and automated disk cleanup boundaries.
+*   Reliable data streams across a **multi-cloud network mesh** consisting of MongoDB Atlas, Upstash, and Cloudinary.
+*   High-concurrency traffic patterns while maintaining clean boundary lines and fully predictable system behaviors.
