@@ -13,7 +13,7 @@ OmniFeed is a robust, production-ready RESTful API designed to power modern high
 
 ---
 
-# 🔥 Highlighted System Features & Architectural Enhancements
+## 🔥 Highlighted System Features & Architectural Enhancements
 
 ### Distributed Caching & Data Consistency
 * **High-Speed Caching Layer:** Integrates a cloud-hosted **Upstash Redis** cluster running over secure TLS/SSL proxies. Caches intensive endpoints—such as the Global Video Feed and User Watch History—to reduce primary database load and deliver sub-millisecond response times.
