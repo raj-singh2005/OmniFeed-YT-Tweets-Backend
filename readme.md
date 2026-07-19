@@ -13,21 +13,26 @@ OmniFeed is a robust, production-ready RESTful API designed to power modern high
 
 ---
 
-## 🔥 Highlighted System Features & Architectural Enhancements
+# 🔥 Highlighted System Features & Architectural Enhancements
 
-*   **⚡ High-Speed Cloud Caching Layer:** Integrates an external cloud-hosted **Upstash Redis** cluster running over secure TLS/SSL proxies. Caches intensive pipelines like the *Global Video Feed* and *User Watch History* to protect the primary database layer, achieving rapid sub-millisecond response intervals.
-*   **♻️ Active Cache Invalidation Subsystem:** Implements strict data consistency policies using state-driven invalidation hooks. When a user creates, updates, or deletes a resource (e.g., publishing a new video or tweet), the system automatically flushes the corresponding cached keys, ensuring clients never receive stale data.
-*   **🌐 Comprehensive Multi-Cloud Data Array Infrastructure:** Engineered to process and manage a wide variety of data payloads—including heavy video file streams, structural image assets, text-based micro-blogs, and real-time interaction states. Data is intelligently distributed across a modern multi-cloud grid: **MongoDB Atlas** for document persistence, **Upstash Cloud** for in-memory caching, and **Cloudinary Clusters** for global media delivery.
-*   **🛡️ Cryptographic Identity Control & Dual-Token Architecture:** Implements a rigid, state-free authorization system utilizing two independent JWTs with distinct responsibilities:
-    *   *Access Tokens (1 Day):* Exposes non-sensitive claims in headers or cookies to authorize active API resource pipelines.
-    *   *Refresh Tokens (10 Days):* Secured via HTTP-Only cookies and backed by a database storage cluster to automatically rotate sessions without user friction or replay attack risks.
-*   **🎛️ Centralized Error, Response & Safety Framework:** Implements strict, predictable data contracts across the application using unified wrapper modules (`ApiError`, `ApiResponse`) that prevent internal application data leaks and standardize downstream client consumption.
-*   **⚙️ Production-Grade Design Safeguards:** Built with strict production patterns including centralized async error interceptors (`asyncHandler`) to completely eliminate repetitive try-catch blocks and keep controllers clean, alongside specialized request object defenses (`req.params || {}`) to guard against structural server crashes.
-*   **🛠️ Resilient Self-Healing Caching Strategy:** Outfitted with an optimized client connection topology featuring infinite background retry recovery strategies (`maxRetriesPerRequest: null`) and a 10-second web network handshake timeout layer to guarantee absolute protection against network lag or engine down-time.
-*   **🧠 Automated Memory Eviction (LRU):** Configured with serverless, memory-capped Least Recently Used (LRU) data eviction schemas. When the system hits its data capacity limit, it gracefully drops legacy cached entries to accept fresh inputs, keeping the system up without memory leakage or out-of-memory container crashes.
-*   **🐳 Containerized Service Environment:** Encapsulated inside an industrial **Docker Compose** ecosystem utilizing independent volume tracking and isolated bridge networks. The host application dynamically pulls explicit environment layers (`env_file`) while stripping local dependency blocks to optimize host resource consumption.
-*   **🔀 Parallel Aggregation Engine:** Leverages advanced MongoDB `$facet`, `$unwind`, and `$group` operations to execute multi-collection analytics concurrently, drastically optimizing server memory allocations.
-*   **📦 Defensive Cloud File Pipeline:** Integrates a secure, multi-stage file management system utilizing `multer` for raw local disk buffering and `cloudinary` storage clusters for assets.
+### Distributed Caching & Data Consistency
+* **High-Speed Caching Layer:** Integrates a cloud-hosted **Upstash Redis** cluster running over secure TLS/SSL proxies. Caches intensive endpoints—such as the Global Video Feed and User Watch History—to reduce primary database load and deliver sub-millisecond response times.
+* **Active Cache Invalidation:** Implements state-driven invalidation hooks across mutative operations (POST, PATCH, DELETE). The system automatically flushes corresponding cache keys upon resource updates to guarantee strict data consistency and eliminate stale reads.
+* **Fault-Tolerant Connection Topology:** Outfitted with an optimized Redis client configuration featuring background retry strategies (`maxRetriesPerRequest: null`) and a 10-second network handshake timeout window to prevent application crashes during transient network latency.
+* **Automated Cache Eviction:** Relies on memory-capped Least Recently Used (LRU) data eviction schemas managed at the cloud database level. Automatically drops stale cache entries when capacity limits are reached to maintain system availability and prevent out-of-memory errors.
+
+### Security, Framework & Error Controls
+* **Dual-Token Authentication Architecture:** Implements a stateless authorization system utilizing two independent JSON Web Tokens (JWTs) with distinct responsibilities:
+  * *Access Tokens (1 Day):* Encapsulates non-sensitive user claims within HTTP headers or cookies to authorize active API requests.
+  * *Refresh Tokens (10 Days):* Stored in secure HTTP-Only cookies and verified against a database registry to handle seamless session rotation while mitigating token replay vectors.
+* **Standardized API Response & Error Framework:** Guarantees uniform client data contracts by intercepting all operational outputs through dedicated `ApiError` and `ApiResponse` class wrappers, preventing sensitive internal stack leaks.
+* **Centralized Async Control Flow:** Utilizes a global asynchronous handler wrapper (`asyncHandler`) across all Express routes to systematically catch unhandled promise rejections, completely eliminating redundant try-catch blocks within controller files.
+
+### Data Pipelines & Infrastructure Isolation
+* **Multi-Cloud Data Management:** Managed orchestration for highly varied payloads including large video files, binary images, text streams, and system interaction graphs. Workloads are distributed across dedicated services: **MongoDB Atlas** for document persistence, **Upstash Cloud** for caching, and **Cloudinary** for high-availability media content delivery.
+* **Optimized Database Aggregations:** Leverages advanced MongoDB aggregation stages—including `$facet`, `$unwind`, and `$group`—to compute multi-collection metrics and channel data concurrently within a single database round-trip.
+* **Defensive Media Buffering Pipeline:** Combines `multer` for raw local disk stream buffering with automated post-upload cleanup routines to handle file uploads securely without leaving residual artifacts on the application container.
+* **Containerized Service Isolation:** Encapsulated within a **Docker Compose** ecosystem utilizing isolated bridge networks and volume tracking. The application container dynamically isolates environmental configurations via strict `.env` mapping to decouple code execution from host machine dependencies.
 
 ---
 
